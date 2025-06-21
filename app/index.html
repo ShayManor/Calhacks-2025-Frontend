@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Limitless Agents Made Simple</title>
+    <!-- Include Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/typewriter-effect@latest/dist/core.js"></script>
+
+    <!-- ------------------------------------------- -->
+
+    <style>
+        /* WebGL Canvas Styling */
+        #shader-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -50;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            filter: blur(4px);
+            mix-blend-mode: screen;
+        }
+
+        /* Optional: Smooth animation for page transitions */
+        body {
+            background-color: #ffffff;
+            transition: background-color 0.5s ease;
+        }
+    </style>
+
+    <!-- ------------------------------------------- -->
+</head>
+
+<body class="bg-white text-gray-900">
+
+<!-- ------------------------------------------- -->
+<canvas id="shader-bg" class="fixed inset-0 w-screen h-screen z-[-50] pointer-events-none"></canvas>
+<!-- Center Guide Lines -->
+<div class="fixed inset-0 pointer-events-none z-50">
+    <!-- Vertical line -->
+    <div class="absolute top-0 bottom-0 left-1/2 w-px bg-white/30"></div>
+    <!-- Horizontal line -->
+    <div class="absolute left-0 right-0 top-1/2 h-px bg-white/30"></div>
+</div>
+<!-- ------------------------------------------- -->
+
+<div class="bg-white">
+    <!-- Header -->
+    <header class="absolute inset-x-0 top-0 z-50">
+        <nav class="bg-white">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <!-- Left section: Logo + Nav links -->
+                    <div class="flex items-center">
+                        <!-- Logo -->
+                        <a href="index.html" class="flex items-center">
+                            <svg class="w-12 h-12 text-indigo-700 drop-shadow" viewBox="-2 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Left Hexagon -->
+                                <path d="M0 75 L15 50 L45 50 L60 75 L45 100 L15 100 Z"
+                                      stroke="currentColor" stroke-width="6"
+                                      fill="none" stroke-linejoin="round" stroke-linecap="round" />
+
+                                <!-- Right Hexagon -->
+                                <path d="M45 75 L60 50 L90 50 L105 75 L90 100 L60 100 Z"
+                                      stroke="currentColor" stroke-width="6"
+                                      fill="none" stroke-linejoin="round" stroke-linecap="round" />
+
+                                <!-- Top Hexagon -->
+                                <path d="M22.5 40 L37.5 15 L67.5 15 L82.5 40 L67.5 65 L37.5 65 Z"
+                                      stroke="currentColor" stroke-width="6"
+                                      fill="none" stroke-linejoin="round" stroke-linecap="round" />
+                            </svg>
+                            <span class="ml-3 text-3xl font-semibold relative after:content-[''] after:block after:w-full after:h-[3px] after:bg-indigo-500 after:absolute after:bottom-[-12px]">HiveAI</span>
+                        </a>
+
+                        <!-- Nav links (slightly lowered) -->
+                        <div class="hidden sm:flex sm:ml-10 mt-1.5 space-x-8">
+                            <a href="agent.html" class="border-b-2 border-transparent text-lg font-semibold text-gray-900 px-1 py-1 hover:text-indigo-600 transition">Agent</a>
+                            <a href="discover.html" class="border-b-2 border-transparent text-lg font-semibold text-gray-900 px-1 py-1 hover:text-indigo-600 transition">Discover</a>
+                        </div>
+                    </div>
+
+                    <!-- Mobile menu toggle -->
+                    <div class="flex items-center sm:hidden">
+                        <button type="button" class="bg-gray-100 p-2 rounded-full text-gray-900 hover:text-indigo-600 hover:bg-indigo-50 focus:outline-none" id="mobile-menu-toggle">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div class="sm:hidden hidden" id="mobile-menu">
+                <div class="px-2 pt-2 pb-3 space-y-1">
+                    <a href="agent.html" class="block border-l-4 border-indigo-500 bg-indigo-50 text-gray-900 px-3 py-2 text-base font-medium">Agent</a>
+                    <a href="discover.html" class="block border-l-4 border-transparent text-gray-900 hover:bg-indigo-50 hover:border-indigo-600 hover:text-indigo-600 px-3 py-2 text-base font-medium">Discover</a>
+                </div>
+            </div>
+        </nav>
+
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden lg:hidden" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 z-50"></div>
+            <div class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+                <div class="flex items-center justify-between">
+                    <a href="#" class="-m-1.5 p-1.5">
+                        <span class="sr-only">Hive AI</span>
+                        <svg class="w-12 h-12" viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12.9914 2.86904C12.9914 2.86899 ... 16.8722 12Z"/>
+                        </svg>
+                    </a>
+                    <button id="mobileMenuButton" type="button" class="-m-2.5 rounded-md p-2.5 pr-10 text-gray-700">
+                        <span class="sr-only">Close menu</span>
+                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="mt-6 flex flex-col space-y-4">
+                    <a href="agent.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition">Agent</a>
+                    <a href="discover.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition">Discover</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Hero Section with reduced top padding -->
+    <main class="relative isolate px-6 lg:px-8">
+
+        <!-- Decorative Background
+        <div class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80" aria-hidden="true">
+            <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"></div>
+        </div>
+        -->
+        <div class="mx-auto max-w-3xl py-18 sm:py-48  text-center">
+            <h1 class="mt-10 text-6xl font-bold tracking-tight sm:text-7xl">
+                Limitless Agents Made Simple
+            </h1>
+            <p class="mt-8 text-lg font-medium text-gray-1500 sm:text-xl h-24">
+                <span id="typewriter-text" class="transition-opacity duration-1000 ease-in-out opacity-100"></span>
+            </p>
+            <div class="mt-8 flex items-center justify-center gap-x-8 relative -left-1">
+                <!-- Get Started button -->
+                <a href="agent.html" class="w-[180px] text-center rounded-xl bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 hover:from-purple-600 hover:to-blue-600 px-4 py-2.5 text-xl font-bold text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                    Get Started
+                </a>
+
+                <!-- Discover button, nudged left -->
+                <a href="discover.html" class="relative -right-0.5 text-xl font-semibold text-white/80 hover:text-white transition duration-300">
+                    Explore the Hive <span aria-hidden="true">→</span>
+                </a>
+
+            </div>
+        </div>
+        <!-- Lower Decorative Background
+        <div class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]" aria-hidden="true">
+            <div class="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"></div>
+        </div> -->
+    </main>
+
+    <!--Content for typewriter text-->
+    <script>
+        const element = document.getElementById('typewriter-text');
+
+        function fadeOut() {
+            element.classList.remove('opacity-100');
+            element.classList.add('opacity-0');
+        }
+
+        function fadeIn() {
+            element.classList.remove('opacity-0');
+            element.classList.add('opacity-100');
+        }
+
+        function startFirstSequence() {
+            fadeIn();
+            const t1 = new Typewriter(element, {
+                loop: false,
+                delay: 35,
+            });
+
+            t1.typeString("Follow your curiosity.")
+                .pauseFor(800)
+                .typeString(" Any agent,")
+                .pauseFor(200)
+                .typeString(" any idea,")
+                .pauseFor(200)
+                .typeString(" simply at the click of a button.")
+                .pauseFor(2000)
+                .callFunction(() => {
+                    fadeOut();
+                    setTimeout(() => {
+                        element.innerHTML = '';
+                        startSecondSequence();
+                    }, 1000);
+                })
+                .start();
+        }
+
+        function startSecondSequence() {
+            fadeIn();
+            const t2 = new Typewriter(element, {
+                loop: false,
+                delay: 35,
+            });
+
+            t2.typeString("No agent?")
+                .pauseFor(700)
+                .typeString(" No problem.")
+                .pauseFor(700)
+                .typeString(" Our innovative agent communicates with other agents to solve your problems.")
+                .pauseFor(1000)
+                .typeString(" If a required agent doesn't exist, our software creates it,")
+                .pauseFor(200)
+                .typeString(" adding the new agent to the hive.")
+                .pauseFor(2000)
+                .callFunction(() => {
+                    fadeOut();
+                    setTimeout(() => {
+                        element.innerHTML = '';
+                        startThirdSequence();
+                    }, 1000);
+                })
+                .start();
+        }
+
+        function startThirdSequence() {
+            fadeIn();
+            const t3 = new Typewriter(element, {
+                loop: false,
+                delay: 35,
+            });
+
+            t3.typeString("Thousands of agents,")
+                .pauseFor(800)
+                .typeString(" all part of a single Hive, ")
+                .pauseFor(400)
+                .typeString(" working towards achieving your goals.")
+                .pauseFor(2000)
+                .callFunction(() => {
+                    fadeOut();
+                    setTimeout(() => {
+                        element.innerHTML = '';
+                        startFirstSequence();
+                    }, 1000);
+                })
+                .start();
+        }
+
+        startFirstSequence();
+    </script>
+
+    <!-- Footer -->
+    <!-- Footer at the Top of the Page -->
+    <!-- Footer Placed at the Front of the Page -->
+    <div class="relative z-50 w-full">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <nav class="flex justify-center gap-x-12" aria-label="Footer">
+                <a href="agent.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition">Agent</a>
+                <a href="discover.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition">Discover</a>
+            </nav>
+            <p class="mt-4 text-center text-lg font-bold text-black-100">
+                &copy; 2025 HiveAI. All rights reserved.
+            </p>
+        </div>
+    </div>
+
+
+</div>
+
+<!-- JavaScript for Navbar Toggle -->
+<script>
+    const menuButton = document.getElementById('menuButton');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileMenuButton = document.getElementById('mobileMenuButton');
+
+    menuButton.addEventListener('click', () => {
+        mobileMenu.classList.remove('hidden');
+    });
+
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.add('hidden');
+    });
+</script>
+
+<!-- ----------------------------------------------------------------------------------------------- -->
+<script>
+    const vertex = `
+    attribute vec2 position;
+    void main() {
+      gl_Position = vec4(position, 1.0, 1.0);
+    }
+  `;
+
+    const fragment = `
+precision mediump float;
+uniform float u_time;
+uniform vec2 u_resolution;
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+
+  vec2 centers[3];
+  centers[0] = vec2(0.3, 0.3);
+  centers[1] = vec2(0.7, 0.4);
+  centers[2] = vec2(0.5, 0.8);
+
+  float rippleSum = 0.0;
+
+  for (int i = 0; i < 3; i++) {
+    vec2 st = uv - centers[i];
+    float dist = length(st);
+rippleSum += sin(14.0 * dist - u_time * 0.7) / 3.0;
+  }
+
+  float intensity = 0.4 + 0.6 * rippleSum;
+
+  vec3 base = vec3(0.02, 0.05, 0.2);   // dark blue background
+  vec3 wave = vec3(0.1, 0.5, 0.9);     // ripple blue glow
+  vec3 color = mix(base, wave, intensity);
+
+  gl_FragColor = vec4(color, 0.5);     // semi-transparent
+}
+`;
+
+
+
+    function createShader(gl, type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        return shader;
+    }
+
+    function initShaderCanvas() {
+        const canvas = document.getElementById("shader-bg");
+        const gl = canvas.getContext("webgl");
+        if (!gl) return;
+
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+
+        const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertex);
+        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragment);
+
+        const program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+        gl.useProgram(program);
+
+        const position = gl.getAttribLocation(program, "position");
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            -1, -1, 1, -1, -1, 1,
+            -1, 1, 1, -1, 1, 1
+        ]), gl.STATIC_DRAW);
+
+        gl.enableVertexAttribArray(position);
+        gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+
+        const u_time = gl.getUniformLocation(program, "u_time");
+        const u_resolution = gl.getUniformLocation(program, "u_resolution");
+
+        function render(time) {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = window.innerWidth * dpr;
+            canvas.height = window.innerHeight * dpr;
+            gl.viewport(0, 0, canvas.width, canvas.height);
+
+            gl.uniform1f(u_time, time * 0.001);
+            gl.uniform2f(u_resolution, canvas.width, canvas.height);
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+            requestAnimationFrame(render);
+        }
+
+
+        render();
+    }
+
+    window.addEventListener("load", initShaderCanvas);
+    window.addEventListener("resize", () => {
+        const canvas = document.getElementById("shader-bg");
+        if (canvas) {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = window.innerWidth * dpr;
+            canvas.height = window.innerHeight * dpr;
+            const gl = canvas.getContext("webgl");
+            if (gl) {
+                gl.viewport(0, 0, canvas.width, canvas.height);
+            }
+        }
+    });
+</script>
+<!-- ------------------------------------------------------------------------------------------------------- -->
+
+</body>
+</html>
