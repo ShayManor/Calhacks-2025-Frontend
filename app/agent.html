@@ -5,7 +5,7 @@
     <title>Create Research Agent</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
+<body>
 <!-- control for the Navbar properties + look -->
 <nav class="bg-white shadow">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -17,18 +17,16 @@
                         <path d="M0 75 L15 50 L45 50 L60 75 L45 100 L15 100 Z"
                               stroke="currentColor" stroke-width="6"
                               fill="none" stroke-linejoin="round" stroke-linecap="round" />
-
                         <!-- Right Hexagon -->
                         <path d="M45 75 L60 50 L90 50 L105 75 L90 100 L60 100 Z"
                               stroke="currentColor" stroke-width="6"
                               fill="none" stroke-linejoin="round" stroke-linecap="round" />
-
                         <!-- Top Hexagon -->
                         <path d="M22.5 40 L37.5 15 L67.5 15 L82.5 40 L67.5 65 L37.5 65 Z"
                               stroke="currentColor" stroke-width="6"
                               fill="none" stroke-linejoin="round" stroke-linecap="round" />
                     </svg>
-                    <span class="ml-3 text-3xl font-semibold relative after:content-[''] after:block after:w-full after:h-[3px] after:bg-transparent after:absolute after:bottom-[12]">HiveAI</span>
+                    <span class="ml-3 text-3xl font-semibold relative after:content-[''] after:block after:w-full after:h-[3px] after:bg-transparent after:absolute after:bottom-[12px]">HiveAI</span>
                 </a>
                 <div class="hidden sm:flex sm:ml-10 mt-1.5 space-x-8">
                     <a href="agent.html" class="border-b-2 border-indigo-500 text-lg font-semibold text-gray-900 px-1 py-2 hover:text-indigo-700 transition">Agent</a>
@@ -36,7 +34,7 @@
                 </div>
             </div>
             <div class="flex items-center">
-                <button type="button" class="bg-gray-100 p-2 rounded-full tet-gray-900 hover:text-indigo-700 hover:bg-indigo-50 focus:outline-none focus:ring-2 focusLring-indigo-500 focus:ring-offset-2 sm:hidden" id="mobile-menu-toggle">
+                <button type="button" class="bg-gray-100 p-2 rounded-full text-gray-900 hover:text-indigo-700 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:hidden" id="mobile-menu-toggle">
                     <span class="sr-only">Open main menu</span>
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -53,16 +51,159 @@
     </div>
 </nav>
 
+<main class="container mx-auto pt-25">
+    <div class="px-6 py-16 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+            <h2 class="mt-2 text-4xl font-bold tracking-tight text-indigo-950 sm:text-6xl">
+                Boost Productivity with Hive
+            </h2>
+            <p class="mt-6 text-lg text-indigo-900">
+                Enter a title for your agent and a quick prompt describing what you need from it. Our AI agent will search through the hive, using other existing agents and creating new ones in real time when necessary.
+            </p>
+        </div>
+    </div>
+
+    <div id="initialForm" class="backdrop-blur-md bg-white/10 border border-white/20 shadow-lg max-w-xl mx-auto p-10 mb-28 rounded-lg text-lg space-y-8">
+        <h2 class="text-3xl font-bold mb-6 text-center text-indigo-900">Create an Agent</h2>
+        <form id="agentForm" class="space-y-6">
+            <div>
+                <label for="agentName" class="block text-sm font-medium text-indigo-900">Your Agent Name</label>
+                <input type="text" id="agentName" name="agentName" required
+                       class="mt-1 block w-full rounded-md border border-indigo-600 bg-white/10 px-3 py-2 text-indigo-800 placeholder-indigo-400 focus:border-indigo-400 focus:ring-indigo-400"
+                       placeholder="e.g. Ocean Microplastics Impact">
+            </div>
+            <div>
+                <label for="description" class="block text-sm font-medium text-indigo-900">Agent Prompt</label>
+                <textarea id="description" name="description" required
+                          class="mt-1 block w-full rounded-md border border-indigo-600 bg-white/10 px-3 py-2 text-indigo-800 placeholder-indigo-400 focus:border-indigo-400 focus:ring-indigo-400"
+                          placeholder="e.g. How do microplastics affect aquatic ecosystems at the cellular level?"></textarea>
+            </div>
+            <div>
+                <button type="submit"
+                        class="w-full rounded-md bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 px-4 py-2 text-lg font-bold text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                    Create Agent
+                </button>
+            </div>
+        </form>
+
+        <!-- Loading bar, initially hidden -->
+        <div id="loadingBarContainer" class="hidden mt-6">
+            <div class="w-full bg-indigo-100 rounded-full h-4 shadow-inner">
+                <div id="loadingBar" class="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 h-4 rounded-full transition-all duration-500 ease-in-out" style="width: 0%"></div>
+            </div>
+            <p class="text-center mt-2 text-indigo-700 font-semibold">Creating your research agent...</p>
+        </div>
+    </div>
+
+    <div id="agentTreeContainer" class="max-w-full mx-auto mb-12">
+        <h3 class="text-2xl font-bold text-indigo-900 mb-4 text-center">Agent Call Tree</h3>
+        <div id="agentTree" class="flex flex-col items-center space-y-20"></div>
+    </div>
+</main>
+
+<footer class="bg-white mt-10">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <nav class="flex justify-center gap-x-12" aria-label="Footer">
+            <a href="index.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Home</a>
+            <a href="discover.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Discover</a>
+        </nav>
+        <p class="mt-10 text-center text-lg font-bold text-gray-500">
+            &copy; 2025 CurioAI. All rights reserved.
+        </p>
+    </div>
+</footer>
+
+<script>
+    // agent-list & tree-builder from your original code
+    const agentList = [
+        { id:1,parentId:null,name:'HiveAgent',description:'Orchestrates child agents.'},
+        { id:2,parentId:1,name:'FlightSearcher',description:'Finds best flight options.'},
+        { id:3,parentId:1,name:'HotelFinder',description:'Locates hotels. This is a three sentence description of the agent that is being used. I dont know if this will work when the backend is integrated, but lets hope for the best!'},
+        { id:4,parentId:1,name:'RestaurantLocator',description:'Discovers eateries.'},
+        { id:5,parentId:3,name:'PriceComparer',description:'Compares prices.'},
+        { id:6,parentId:2,name:'SeatSelector',description:'Selects seats.'},
+        { id:7,parentId:2,name:'FareCalculator',description:'Calculates fares.'},
+        { id:8,parentId:3,name:'CuisineFilter',description:'Filters by cuisine.'},
+        { id:9,parentId:4,name:'RatingChecker',description:'Checks ratings.'},
+        { id:10,parentId:3,name:'ReviewAggregator',description:'Aggregates reviews.'}
+    ];
+
+    function buildAgentTree(list) {
+        const map = {}, roots = [];
+        list.forEach(i => map[i.id] = { ...i, children: [] });
+        list.forEach(i => {
+            if (i.parentId && map[i.parentId]) map[i.parentId].children.push(map[i.id]);
+            else roots.push(map[i.id]);
+        });
+        return roots;
+    }
+
+    function renderNodeHorizontal(node) {
+        // no mx-4 here—so container is only as wide as needed
+        const container = document.createElement('div');
+        container.className = 'relative flex flex-col items-center';
+
+        const circle = document.createElement('div');
+        circle.className = 'w-12 h-12 bg-yellow-500 rounded-full shadow-lg shadow-yellow-500/50 animate-pulse';
+        container.appendChild(circle);
+
+        const nameEl = document.createElement('div');
+        nameEl.textContent = node.name;
+        nameEl.className = 'mt-2 text-sm font-medium text-gray-900';
+        container.appendChild(nameEl);
+
+        const tip = document.createElement('div');
+        tip.style.display = 'none';
+        tip.className = 'absolute bottom-full left-1/2 -translate-x-1/2 bg-white/20 backdrop-blur-md border border-white/30 rounded-lg shadow-md p-2 text-sm text-gray-900 w-[350px] text-center';
+        tip.innerHTML = node.description;
+        container.appendChild(tip);
+
+        circle.addEventListener('mouseenter', () => tip.style.display = 'block');
+        circle.addEventListener('mouseleave', () => tip.style.display = 'none');
+
+        if (node.children && node.children.length) {
+            const row = document.createElement('div');
+            // horizontal row of children, centered under the parent
+            row.className = 'flex justify-center items-start space-x-12 mt-16';
+            node.children.forEach(child => row.appendChild(renderNodeHorizontal(child)));
+            container.appendChild(row);
+        }
+
+        return container;
+    }
+
+
+    // mobile menu toggle
+    document.getElementById('mobile-menu-toggle')
+        .addEventListener('click', () => document.getElementById('mobile-menu').classList.toggle('hidden'));
+
+    // integrate the new submit handler
+    const agentForm = document.getElementById('agentForm');
+    const loadingBarContainer = document.getElementById('loadingBarContainer');
+    const loadingBar = document.getElementById('loadingBar');
+    const agentTree = document.getElementById('agentTree');
+
+    agentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        loadingBarContainer.classList.remove('hidden');
+        loadingBar.style.width = '70%';
+
+        setTimeout(() => {
+            loadingBar.style.width = '100%';
+
+            setTimeout(() => {
+                loadingBarContainer.innerHTML =
+                    `<p class="text-center text-green-600 font-bold text-xl mt-4">
+                        Agent Created Successfully!
+                    </p>`;
+
+                // now render agent tree
+                const roots = buildAgentTree(agentList);
+                agentTree.innerHTML = '';
+                roots.forEach(r => agentTree.appendChild(renderNodeHorizontal(r)));
+            }, 500);
+        }, 1500);
+    });
+</script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-    </div>
-</nav>
