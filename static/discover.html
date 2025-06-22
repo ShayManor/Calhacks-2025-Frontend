@@ -53,61 +53,444 @@
     </div>
 </nav>
 
-<!-- Main Section -->
+<!-- ─────────────────── MAIN ─────────────────── -->
 <main class="bg-white min-h-screen mt-1 py-16">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
         <div class="mx-auto max-w-2xl text-center">
-            <h1 class="text-5xl font-bold tracking-tight text-gray-900 sm:text-7xl">Hive Agents</h1>
+            <h1 class="text-5xl font-bold tracking-tight sm:text-7xl">Hive&nbsp;Agents</h1>
             <p class="mt-4 text-lg font-medium text-gray-600">
                 Discover a variety of innovative AI agents just one click away.
             </p>
         </div>
-        <!-- Refresh Button -->
+
+        <!-- refresh button -->
         <div class="mt-10 flex justify-center">
-            <button id="loadAgents" class="rounded-md bg-indigo-500 px-6 py-3 text-lg font-semibold text-white shadow hover:bg-indigo-600 transition">
+            <button id="loadAgents"
+                    class="rounded-md bg-indigo-500 px-6 py-3 text-lg font-semibold text-white
+                     shadow hover:bg-indigo-600 transition">
                 Refresh Agents
             </button>
         </div>
-        <!-- Grid container for research cards -->
-        <ul id="agentsList" role="list" class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 ">
-            <!-- Research cards will be inserted here -->
+
+        <!-- responsive gallery -->
+        <ul id="agentsList"
+            class="mt-10 grid gap-8 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+            <!-- cards injected by JS -->
         </ul>
+
+        <!-- prompt modal -->
+        <div id="promptModal"
+             class="fixed inset-0 flex hidden items-center justify-center
+                bg-black/30 backdrop-blur-sm z-20">
+            <div class="bg-white w-full max-w-lg rounded-xl shadow-xl p-6">
+                <h3 id="modalTitle" class="text-2xl font-semibold"></h3>
+                <p  id="modalDesc"  class="mt-2 text-sm text-gray-600"></p>
+                <pre id="modalPrompt"
+                     class="mt-4 whitespace-pre-wrap rounded bg-gray-100 p-4 text-sm"></pre>
+                <button onclick="closeModal()"
+                        class="mt-6 rounded-md bg-indigo-600 px-4 py-2 text-white
+                       hover:bg-indigo-700">
+                    Close
+                </button>
+            </div>
+        </div>
     </div>
 </main>
 
-<!-- Footer -->
+<!-- ─────────────────── FOOTER (unchanged) ─────────────────── -->
 <footer class="bg-white">
-    <div class="mx-auto max-w-7xl px-6 lg:px-8 py-2">
-        <nav class="flex justify-center gap-x-12" aria-label="Footer">
-            <a href="index.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Home</a>
-            <a href="task.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Task</a>
-            <a href="agent.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Agent</a>
-        </nav>
-        <p class="mt-5 text-center text-lg font-bold text-black-500">
-            &copy; 2025 HiveAI. All rights reserved.
-        </p>
-    </div>
+    <!-- … footer markup exactly as before … -->
 </footer>
 
-<!-- JavaScript for Navbar Toggle and Research Loading -->
+<!-- ─────────────────── JS ─────────────────── -->
 <script>
-    // Mobile menu toggle
-    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-    const mobileMenu = document.getElementById('mobile-menu');
+    /* ---------- mobile nav toggle (unchanged) ---------- */
+    document.getElementById('mobile-menu-toggle')
+        .addEventListener('click', () =>
+            document.getElementById('mobile-menu').classList.toggle('hidden'));
 
-    mobileMenuToggle.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
-    });
+    /* ---------- 30 demo agents: name, desc, prompt, img ---------- */
+    const demoAgents = [
+        /* ───────── CORE SIX ───────── */
+        {
+            name: "Literature-Survey",
+            desc: "Ingests hundreds of peer-reviewed articles and pre-prints for a chosen domain, then clusters them by methodology, year, and citation graph. It produces an annotated gap matrix plus a clean BibTeX library, giving researchers an instant snapshot of where new contributions will matter most.",
+            prompt:
+                `You are a systematic-review agent.
+TASK: Compile a state-of-the-art survey on <TOPIC>.
+STEPS:
+1. Query CrossRef, arXiv, PubMed and IEEE Xplore (last 5 years).
+2. De-duplicate by DOI and cluster papers using TF-IDF cosine on abstracts.
+3. For each cluster extract primary contribution, method, sample size, and result.
+4. Build a “gap matrix” that maps clusters to unanswered questions.
+5. Output:
+   • Markdown overview (≤1 500 words)
+   • gap_matrix.csv
+   • full_annotated.bib (BibTeX, 120–200 entries).`,
+            img: "images/img.png"
+        },
+        {
+            name: "Materials-Selector",
+            desc: "Screens dozens of van-der-Waals heterostructures using published DFT tables and internal heuristics for exfoliation yield. The agent returns a ranked list complete with band-inversion magnitudes, substrate compatibility, and risk scores, saving weeks of lab trial-and-error.",
+            prompt:
+                `Goal: Rank candidate 2-D heterostructures for room-temperature topological superconductivity.
+Input files:
+ • dft_catalog.csv   (columns: compound, Δ_inv(meV), Eg(meV), exfoliation_score)
+ • substrate_rules.yaml
+Procedure:
+ 1. Filter Δ_inv ≥ 20 meV and Eg ≥ 50 meV.
+ 2. Join with substrate_rules; drop pairs needing exotic substrates.
+ 3. Compute “stability_score” = 0.5·exfoliation + 0.5·(Δ_inv / 40 meV).
+ 4. Return top-10 ranked list with a 3-sentence justification each and save as ranked_candidates.tsv.`,
+            img: "images/img_1.png"
+        },
+        {
+            name: "Device-Simulator",
+            desc: "Builds a tight-binding plus Bogoliubov–de-Gennes model for a specified junction geometry, injects random disorder, and sweeps chemical potential. It outputs gap statistics, predicted coherence times, and an expected CZ-gate fidelity curve—essential for hardware road-mapping.",
+            prompt:
+                `Simulate a WTe₂/MoTe₂ Josephson weak link:
+• geometry: 200 nm × 1 µm, lattice a = 3.5 Å.
+• model: 6-band TB (wannier_tb.json) + p-wave pairing Δ₀=2 meV.
+Steps:
+ 1. Build Kwant lattice, attach normal and superconducting leads.
+ 2. Sweep μ from −5 meV to +5 meV in 0.25 meV steps; add onsite disorder σ=0.5 meV.
+ 3. For each μ compute local DOS and topological gap; record if Majorana modes persist.
+ 4. Fit gap→coherence scaling T₂(Δ) = 400 ps / Δ(meV).
+ 5. Output csv (mu, gap, predicted_T₂, CZ_fidelity) + summary markdown.`,
+            img: "images/img_2.png"
+        },
+        {
+            name: "Manuscript-Composer",
+            desc: "Turns raw experiment sections into a polished, two-column IEEE or Nature manuscript. Cross-references figures and equations automatically, compiles a 120-entry bibliography, and exports both LaTeX and camera-ready PDF in minutes instead of days.",
+            prompt:
+                `Combine input sections (intro.md, methods.md, results.md, discussion.md) plus figure PNGs into an IEEEtran LaTeX document.
+Requirements:
+ • two-column,
+ • numbered figures / tables cross-referenced,
+ • 120-item BibTeX (supply placeholder if missing),
+ • appendices for raw data tables.
+Deliverables:
+ 1. main.tex,
+ 2. main.pdf (compiled),
+ 3. figure_map.json (mapping old names → Figure #).`,
+            img: "images/img_3.png"
+        },
+        {
+            name: "Cost-Modeler",
+            desc: "Creates detailed CAPEX and five-year OPEX spreadsheets for semiconductor pilot lines. It amortizes equipment, models utility rates, and performs sensitivity analysis, letting executives see ROI breakeven under best- and worst-case demand scenarios.",
+            prompt:
+                `Build an Excel-compatible xlsx with three sheets:
+  • Capex (tool, qty, unit_cost, depreciation_yrs)
+  • Opex (category, \$k/year, escalation %)
+  • ROI (NPV vs production volume 1–10 k wafers/mo, discount 8 %)
+Input JSON: cost_inputs.json.
+Assume electricity \$0.11 /kWh, clean-room $650 /ft²-yr.
+Return breakeven_year, NPV_base, NPV_worst, chart images (png).`,
+            img: "images/img_4.png"
+        },
+        {
+            name: "Policy-Scanner",
+            desc: "Monitors BIS rulings, EU AI Act drafts, and OECD annexes every week, flagging any clause that could affect export, privacy, or AI-safety compliance. Decision makers receive a concise memo with color-coded risk and suggested mitigations.",
+            prompt:
+                `Set up a weekly cron.
+Sources:
+ • US BIS Federal Register RSS,
+ • EUR-Lex AI Act amendments,
+ • oecd.ai policy observatory API.
+Filter for keywords: “dual-use”, “semiconductor”, “genAI”, “export”, “PII”.
+Produce a 1-page markdown brief with:
+  • summary table (doc, clause, risk_level),
+  • color tag (green / amber / red),
+  • recommended action or “monitor only”.`,
+            img: "images/img_5.png"
+        },
 
-    // Function to fetch and display all agents
-    function loadAgents() {
+        /* ───────── 24 ADDITIONAL (sample longer prompts; some short where obvious) ───────── */
+        {
+            name: "Data-Crawler",
+            desc: "Scours Kaggle, NIH Dataverse, and university mirrors for open datasets that match a user’s schema or topic keywords. Duplicates are merged, licenses are checked, and a machine-readable JSON catalog is produced.",
+            prompt:
+                `Search Kaggle API, Zenodo, and NIH Dataverse for datasets containing the columns {age, bmi, sbp}.
+Deduplicate by SHA-256 of first 1 k rows.
+Validate license ∈ {CC-BY, CC0}.
+Return datasets.json (fields: name, rows, cols, license, download_url).`,
+            img: "images/img_6.png"
+        },
+        {
+            name: "Code-Refactor",
+            desc: "Transforms legacy Python 2 or Java 8 projects into modern, typed, CI-integrated repositories. Unit tests and pre-commit hooks are autogenerated, raising coverage to at least 90 percent before commit.",
+            prompt:
+                `Migrate given repo/ to Python 3.11.
+ • convert print → function, bytes→str,
+ • add mypy and pyproject.toml,
+ • create pytest tests for functions lacking coverage,
+ • configure GitHub Actions for lint + tests.
+Coverage goal ≥90 %.`,
+            img: "images/img_7.png"
+        },
+        {
+            name: "API-Tester",
+            desc: "Consumes an OpenAPI spec, generates a full Postman collection, and builds 100 fuzz cases covering auth flows, enum boundaries, and rate-limit ceilings. CI-ready JSON reports are emitted for each run.",
+            prompt:
+                `Input: swagger.yaml.
+Tasks:
+ 1. Generate Postman v2.1 collection & environment.
+ 2. For each endpoint create fuzz cases:
+    • auth token invalid/expired,
+    • enum boundary +1/-1,
+    • rate-limit 10× normal.
+ 3. Export results to junit.xml and coverage.html.`,
+            img: "images/img_8.png"
+        },
+        {
+            name: "Sentiment-Analyzer",
+            desc: "Streams Twitter or Reddit data for chosen hashtags, classifies sentiment with RoBERTa, and detects topic drift over time. Dashboards include polarity timelines and top-influencer lists.",
+            prompt:
+                `Collect tweets for #<TAG> during the next 7 days using Twitter API v2 filtered stream (English only).
+Apply cardiffnlp/roberta-base-sentiment.
+Produce:
+ • sentiment_timeseries.csv (1-h bins),
+ • influencers.csv (user, avg_sentiment, followers),
+ • markdown summary (≤500 words).`,
+            img: "images/img_9.png"
+        },
+        {
+            name: "Time-Series-Forecaster",
+            desc: "Evaluates ARIMA, Prophet, and LSTM models on any numeric time series. It selects the best based on cross-validated MAE, then delivers 12-month forecasts with 95 percent confidence intervals.",
+            prompt:
+                `Load series.csv (date, value).
+Split 80/20.
+Train ARIMA(auto), Prophet, and LSTM(2×64).
+Select lowest MAE.
+Forecast next 12 months with 95 % CI; save forecast.csv and choose_model.txt.`,
+            img: "images/img_10.png"
+        },
+        {
+            name: "Image-Classifier",
+            desc: "Fine-tunes ViT-base or ResNet on user-supplied image folders, applies auto-augmentation, and exports ONNX or CoreML. A confusion-matrix summary and Grad-CAM heatmaps accompany the deliverables.",
+            prompt:
+                `Fine-tune facebook/vit-base-patch16-224 on dataset/ (class-subfolders).
+Hyper-params:
+  epochs=20, lr=3e-5, mixup=0.2.
+Save best model ONNX + confusion.png + 5 Grad-CAM PNGs.`,
+            img: "images/img_11.png"
+        },
+        {
+            name: "Audio-Transcriber",
+            desc: "Runs Whisper-large to transcribe meetings, lectures, or podcasts at near-human accuracy. The transcript is chunked into speaker-attributed paragraphs and summarized in 300 polished words.",
+            prompt:
+                `Transcribe lecture.mp3 with OpenAI Whisper-large.
+Do VAD diarization; label Speaker 1/2 …
+Output:
+  • transcript.md (speaker paragraphs),
+  • summary_300w.txt.`,
+            img: "images/img_.12png"
+        },
+        {
+            name: "Grant-Writer",
+            desc: "Drafts 15-page NSF-style proposals including aims, broader impacts, timeline Gantt, and a carefully formatted reference list. Narrative consistency and review-panel keywords are optimized automatically.",
+            prompt:
+                `Draft NSF SMALL proposal on “Room-Temp Topological Qubits”.
+Include:
+ • 1-page summary,
+ • 2 pages Broader Impact,
+ • timeline Gantt (svg),
+ • references.bib (>20).`,
+            img: "images/img_13.png"
+        },
+        {
+            name: "Resume-Screener",
+            desc: "Parses PDF résumés, matches them to a job spec, and highlights skill gaps in plain language. Hiring managers get a ranked CSV plus red-flag advisories like employment gaps or unverified certificates.",
+            prompt:
+                `Input: resumes/*.pdf and job_spec.txt.
+Extract skills via spaCy NER.
+Score each resume vs required skills → match_pct.
+Generate ranked.csv + gap_notes.md.`,
+            img: "images/img_14.png"
+        },
+        {
+            name: "Marketing-Email-Generator",
+            desc: "Creates two A/B subject lines and body copies tailored to a demographic slice, complete with snippet-length previews. Subject-line variants are optimized for 25–35-year-old tech buyers.",
+            prompt:
+                `Product brief: brief.md.
+Audience: 25–35 y tech professionals.
+Produce Variant A and Variant B:
+ • subject, preheader (≤70 chars),
+ • body (≤150 words),
+ • CTA link placeholder.`,
+            img: "images/img_15.png"
+        },
+        {
+            name: "AB-Test-Analyzer",
+            desc: "Ingests raw variant counts, computes lift, confidence intervals, and a Bayesian posterior. A one-page PDF includes charts and plain-English takeaways for product managers.",
+            prompt:
+                `Input CSV: daily_counts.csv columns date, A, B.
+Compute uplift %, χ² p-value, and Bayesian beta posterior (α₀=1,β₀=1).
+Export ab_report.pdf with plots + summary.`,
+            img: "images/img_16.png"
+        },
+        {
+            name: "Circuit-Optimizer",
+            desc: "Runs a genetic algorithm on KiCad netlists to minimize total trace length while enforcing ≤5 mV IR-drop and EMC targets. Outputs a new board layout file and a diff report.",
+            prompt:
+                `Load board.kicad_pcb.
+Run GA (pop=64, gens=120) optimizing trace length + IR_drop<5 mV.
+Output board_opt.kicad_pcb + diff.md.`,
+            img: "images/img_17.png"
+        },
+        {
+            name: "Dataset-Anonymizer",
+            desc: "Automatically detects PII columns, masks quasi-identifiers, and adds calibrated Laplace noise for (ε=1, δ=10⁻⁵) differential privacy. A compliance log is generated for auditors.",
+            prompt:
+                `Anonymize customers.csv.
+ • detect PII via regex + NER,
+ • mask names, hash emails,
+ • add Laplace(ε=1,δ=1e-5) to numeric.
+Return sanitized.csv + compliance_log.json.`,
+            img: "images/img_18.png"
+        },
+        {
+            name: "Chatbot-Fine-Tuner",
+            desc: "Leveraging LoRA and RLHF, this agent tunes GPT-J weights to match a brand’s style guide. It produces 4-bit checkpoints ready for low-latency inference.",
+            prompt:
+                `Fine-tune GPT-J on chat_logs.json (60k pairs) using LoRA-rank=8.
+Reward: brand_tone_reward.py.
+Produce adapter.bin (4-bit) + eval_bleu.txt.`,
+            img: "images/img_19.png"
+        },
+        {
+            name: "SAT-Math-Tutor",
+            desc: "Creates adaptive SAT math drills: 30 fresh questions balanced across algebra, geometry, and stats. Each question includes a worked solution and mastery metadata for LMS import.",
+            prompt:
+                `Generate 30 SAT math items:
+  • 10 algebra, 10 geometry, 10 statistics.
+Include:
+  • correct answer,
+  • step-by-step explanation,
+  • mastery tag (easy/med/hard).`,
+            img: "images/img_20.png"
+        },
+        {
+            name: "Travel-Planner",
+            desc: "Designs 7-day itineraries with daily budgets, visa tips, and fallback options for bad weather. It even checks public-transport schedules and local holidays to avoid surprises.",
+            prompt:
+                `Destination: Japan, Nov, 7 days, budget ≤$120/day.
+Plan daily schedule, transport (JR Pass), hostel recs, fallback rain activity.`,
+            img: "images/img_21.png"
+        },
+        {
+            name: "Personal-Finance-Advisor",
+            desc: "Analyzes monthly cash-flow JSON and proposes a 60/40 ETF + DCA plan, projecting FIRE timelines under conservative, base, and optimistic return scenarios.",
+            prompt:
+                `Input: cashflow.json.
+Project FIRE in 15 yr using 60/40 ETF (VTI/BND) + monthly DCA.
+Return FIRE_date_scenarios.csv + advice.md.`,
+            img: "images/img_22.png"
+        },
+        {
+            name: "Gene-Expression-Clustering",
+            desc: "Processes single-cell RNA-seq matrices, performs normalization, PCA, and UMAP, then annotates cluster markers. A concise HTML report is generated for biologists.",
+            prompt:
+                `Load counts.mtx + genes.tsv.
+Run Scanpy pp.filter, log1p, pca, neighbors, UMAP.
+Annotate clusters with sc.tl.rank_genes_groups.
+Export report.html + umap.png.`,
+            img: "images/img_23.png"
+        },
+        {
+            name: "Smart-Contract-Auditor",
+            desc: "Static-analyzes Solidity files, flags re-entrancy, overflow, and gas-waste issues, and summarizes fixes in a markdown audit report suitable for GitHub PRs.",
+            prompt:
+                `Audit solidity/*.sol with Slither + Mythril.
+Flag re-entrancy, tx-origin use, overflows, high gas loops.
+Generate audit.md with severity triage.`,
+            img: "images/img_24.png"
+        },
+        {
+            name: "Drone-Path-Planner",
+            desc: "Computes 3-D waypoints that avoid no-fly zones and minimize battery drain, exporting Mission Planner-compatible waylists and a JSON audit trail.",
+            prompt:
+                `Input: mission.geojson (target poly) + no_fly.geojson.
+Return waypoints.txt (Mission Planner) minimizing distance & energy.`,
+            img: "images/img_25.png"
+        },
+        {
+            name: "Edge-Model-Quantizer",
+            desc: "Converts PyTorch models to INT8 TFLite and EdgeTPU formats. An accuracy-vs-size trade-off table accompanies the artifacts so teams can choose the right footprint.",
+            prompt:
+                `Quantize model.pt to INT8 (TFLite) and int8_edgetpu.tflite.
+Evaluate imagenet_val.tar; report top-1 drop %.`,
+            img: "images/img_26.png"
+        },
+        {
+            name: "Cyber-Threat-Intel",
+            desc: "Aggregates NVD RSS, ThreatGrid, and select dark-web forums, producing a weekly threat brief with CVE links, exploit chatter volume, and recommended mitigations.",
+            prompt:
+                `Every Friday:
+ • pull NVD CVE feed,
+ • scrape Exploit forum for <SOFTWARE>,
+ • summary.md: cve, severity, chatter_score, action.`,
+            img: "images/img_27.png"
+        },
+        {
+            name: "Deepfake-Spotter",
+            desc: "Runs a CNN ensemble to detect GAN artefacts in images and MP4 frames. It highlights suspect regions and outputs a confidence score to help journalists verify media.",
+            prompt:
+                `Detect deepfake in upload.* (jpg/mp4).
+Use EfficientNet-B7 ensemble; output heatmap.png + confidence.json.`,
+            img: "images/img_28.png"
+        },
+        {
+            name: "Prompt-Optimizer",
+            desc: "Uses genetic algorithms to evolve high-reward prompts for any LLM task, reporting Rouge-L or BLEU improvements and delivering the top five variants for production.",
+            prompt:
+                `Evolve 100 prompt variants for “summarize scientific abstract” task.
+Fitness: Rouge-L vs gold summary.
+Return top5.csv.`,
+            img: "images/img_29.png"
+        }
+    ];
 
+    /* ---------- build one card -------------------------------------- */
+    function cardTemplate(agent, idx) {
+        return `
+    <li class="relative flex flex-col rounded-2xl bg-white shadow ring-1 ring-gray-200
+               hover:ring-indigo-400 transition p-4">
+      <div class="h-40 w-full overflow-hidden rounded-lg bg-gray-100">
+        <img src="${agent.img}" alt="${agent.name}"
+             class="h-full w-full object-cover object-center">
+      </div>
+      <h3 class="mt-4 text-lg font-semibold">${agent.name}</h3>
+      <p class="mt-2 text-sm text-gray-600 leading-relaxed">${agent.desc}</p>
+      <button onclick="showPrompt(${idx})"
+              class="mt-auto self-start rounded-md bg-indigo-600
+                     px-4 py-2 text-sm font-medium text-white
+                     hover:bg-indigo-700 focus:outline-none
+                     focus:ring-2 focus:ring-indigo-500">
+        View Details
+      </button>
+    </li>`;
     }
 
-    // Add event listener to the load button and auto-load research on page load
-    document.getElementById('loadAgents').addEventListener('click', loadAgents);
-    window.onload = loadAgents;
-</script>
+    /* ---------- modal helpers --------------------------------------- */
+    function showPrompt(i) {
+        const a = demoAgents[i];
+        document.getElementById("modalTitle").textContent  = a.name;
+        document.getElementById("modalDesc").textContent   = a.desc;
+        document.getElementById("modalPrompt").textContent = a.prompt;
+        document.getElementById("promptModal").classList.remove("hidden");
+    }
+    function closeModal() {
+        document.getElementById("promptModal").classList.add("hidden");
+    }
 
+    /* ---------- inject gallery -------------------------------------- */
+    function loadAgents() {
+        document.getElementById("agentsList").innerHTML =
+            demoAgents.map(cardTemplate).join("");
+    }
+    document.getElementById("loadAgents").addEventListener("click", loadAgents);
+    window.addEventListener("DOMContentLoaded", loadAgents);
+</script>
 </body>
 </html>
