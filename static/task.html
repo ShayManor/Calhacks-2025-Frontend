@@ -1,151 +1,242 @@
 <!DOCTYPE html>
+<!--
+  ────────────────────────────────────────────────────────────────────────────────
+  TASK HIVE AGENT PAGE
+  -------------------------------------------------------------------------------
+  • Purpose:  Front-end page that lets the user write a task prompt, shows a
+              progress bar while the job “runs”, and (for demo purposes) renders
+              a D3 tree of agents that might collaborate on the task.
+  • Tech:     TailwindCSS for styling, D3.js v7 for the tree, vanilla JS for UI
+              interactivity.
+  • What you can tweak safely:  Anything cosmetic (classes, colours, spacing).
+    Logic is all in the three <script> blocks at the bottom.
+  ────────────────────────────────────────────────────────────────────────────────
+-->
+
 <html lang="en">
 <head>
+    <!-- Required meta tags -->
     <meta charset="UTF-8" />
+
     <title>Task Hive's Agent</title>
+
+    <!-- TailwindCSS (utility-first styling framework) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- fade-in/fade-out for textarea placeholder -->
+
+    <!-- D3 for the agent-tree visual (note: we load it again just before usage) -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- Local styles (only a tiny placeholder-fade effect right now) -->
     <style>
-        textarea::placeholder {
-            opacity: 1;
-            transition: opacity 1.5s ease;
-        }
-        textarea.fade::placeholder {
-            opacity: 0;
-        }
+        /* Fade textarea placeholder text so it feels alive */
+        textarea::placeholder               { opacity: 1; transition: opacity 1.5s ease; }
+        textarea.fade::placeholder          { opacity: 0; }
     </style>
 </head>
+
 <body>
-<!-- Navbar -->
+<!-- ─────────────────────────────────── NAVBAR ───────────────────────────────── -->
 <nav class="bg-white shadow-lg">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-20">
+            <!-- Logo + Site navigation (desktop) -->
             <div class="flex items-center">
                 <a href="index.html" class="flex items-center">
-                    <svg class="w-12 h-12 text-indigo-700 drop-shadow" viewBox="-2 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M0 75 L15 50 L45 50 L60 75 L45 100 L15 100 Z" stroke="currentColor" stroke-width="6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-                        <path d="M45 75 L60 50 L90 50 L105 75 L90 100 L60 100 Z" stroke="currentColor" stroke-width="6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
-                        <path d="M22.5 40 L37.5 15 L67.5 15 L82.5 40 L67.5 65 L37.5 65 Z" stroke="currentColor" stroke-width="6" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+                    <!-- Honeycomb-ish SVG logo -->
+                    <svg class="w-12 h-12 text-indigo-700 drop-shadow" viewBox="-2 0 110 110"
+                         fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0 75 L15 50 L45 50 L60 75 L45 100 L15 100 Z"
+                              stroke="currentColor" stroke-width="6" fill="none"
+                              stroke-linejoin="round" stroke-linecap="round"/>
+                        <path d="M45 75 L60 50 L90 50 L105 75 L90 100 L60 100 Z"
+                              stroke="currentColor" stroke-width="6" fill="none"
+                              stroke-linejoin="round" stroke-linecap="round"/>
+                        <path d="M22.5 40 L37.5 15 L67.5 15 L82.5 40 L67.5 65 L37.5 65 Z"
+                              stroke="currentColor" stroke-width="6" fill="none"
+                              stroke-linejoin="round" stroke-linecap="round"/>
                     </svg>
+                    <!-- Brand text with bottom accent bar (see Tailwind after: pseudo-el) -->
                     <span class="ml-3 text-3xl font-semibold relative
-                         after:content-[''] after:block after:w-full after:h-[3px]
-                         after:bg-transparent after:absolute after:bottom-[12px]">
-              HiveAI
-            </span>
+                       after:content-[''] after:block after:w-full after:h-[3px]
+                       after:bg-transparent after:absolute after:bottom-[12px]">
+            HiveAI
+          </span>
                 </a>
+
+                <!-- Desktop nav items -->
                 <div class="hidden sm:flex sm:ml-10 mt-1.5 space-x-8">
-                    <a href="task.html"     class="border-b-2 border-indigo-500 text-lg font-semibold text-gray-900 px-1 py-2 hover:text-indigo-700 transition">Task</a>
-                    <a href="agent.html"    class="border-b-2 border-transparent text-lg font-semibold text-gray-900 px-1 py-2 hover:text-indigo-700 transition">Agent</a>
-                    <a href="discover.html" class="border-b-2 border-transparent text-lg font-semibold text-gray-900 px-1 py-2 hover:text-indigo-700 transition">Discover</a>
+                    <a href="task.html"
+                       class="border-b-2 border-indigo-500 text-lg font-semibold text-gray-900 px-1 py-2 hover:text-indigo-700 transition">
+                        Task
+                    </a>
+                    <a href="agent.html"
+                       class="border-b-2 border-transparent text-lg font-semibold text-gray-900 px-1 py-2 hover:text-indigo-700 transition">
+                        Agent
+                    </a>
+                    <a href="discover.html"
+                       class="border-b-2 border-transparent text-lg font-semibold text-gray-900 px-1 py-2 hover:text-indigo-700 transition">
+                        Discover
+                    </a>
                 </div>
             </div>
+
+            <!-- Mobile menu “toggle” -->
             <div class="flex items-center">
                 <button id="mobile-menu-toggle"
-                        class="bg-gray-100 p-2 rounded-full text-gray-900 hover:text-indigo-700 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:hidden"
+                        class="bg-gray-100 p-2 rounded-full text-gray-900 hover:text-indigo-700
+                       hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500
+                       focus:ring-offset-2 sm:hidden"
                         type="button">
                     <span class="sr-only">Open main menu</span>
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
                     </svg>
                 </button>
             </div>
         </div>
     </div>
+
+    <!-- Mobile dropdown list (hidden by default) -->
     <div id="mobile-menu" class="sm:hidden hidden">
         <div class="px-2 pt-2 pb-3 space-y-1">
-            <a href="index.html" class="block border-l-4 border-indigo-500 text-gray-900 px-3 py-2 text-base font-medium">Home</a>
-            <a href="agent.html" class="block border-l-4 border-transparent bg-indigo-50 text-gray-900 px-3 py-2 text-base font-medium">Agent</a>
-            <a href="discover.html" class="block border-l-4 border-transparent text-gray-900 hover:bg-indigo-50 hover:border-indigo-600 hover:text-indigo-700 px-3 py-2 text-base font-medium">Discover</a>
+            <a href="index.html"
+               class="block border-l-4 border-indigo-500 text-gray-900 px-3 py-2 text-base font-medium">
+                Home
+            </a>
+            <a href="agent.html"
+               class="block border-l-4 border-transparent bg-indigo-50 text-gray-900 px-3 py-2 text-base font-medium">
+                Agent
+            </a>
+            <a href="discover.html"
+               class="block border-l-4 border-transparent text-gray-900 hover:bg-indigo-50
+                hover:border-indigo-600 hover:text-indigo-700 px-3 py-2 text-base font-medium">
+                Discover
+            </a>
         </div>
     </div>
 </nav>
 
-<main class="container mx-auto pt-25">
-    <div class="px-6 py-16 lg:px-8">
+<!-- ─────────────────────────────────── HERO / FORM ─────────────────────────── -->
+<main class="container mx-auto pt-24"><!-- pt-24 ≈ 6rem top padding -->
+    <div class="px-6 py-161 lg:px-8">
         <div class="mx-auto max-w-3xl text-center">
-            <h2 class="mt-2 text-4xl font-bold tracking-tight text-indigo-950 sm:text-6xl">
+            <h2 class="text-4xl font-bold tracking-tight text-indigo-950 sm:text-6xl">
                 Boost Productivity with Hive
             </h2>
             <p class="mt-6 text-lg text-indigo-900">
-                Enter a prompt for Hive's general agent describing what you need from it. Our AI agent will then search through the hive, using other existing agents and creating new ones in real time when necessary in order to achieve your task.
+                Enter a prompt for Hive's general agent describing what you need from it.
+                Our AI agent will then search through the hive, using other existing
+                agents and creating new ones in real time when necessary in order to
+                achieve your task.
             </p>
         </div>
     </div>
 
-    <div id="initialForm" class="backdrop-blur-md bg-white/10 border border-white/20 shadow-lg max-w-xl mx-auto p-10 mb-28 rounded-lg text-lg space-y-8">
-        <h2 class="text-3xl font-bold mb-6 text-center text-indigo-900">Task our Agent</h2>
+    <!-- Prompt input card -->
+    <div id="initialForm"
+         class="backdrop-blur-md bg-white/10 border border-white/20 shadow-lg
+              max-w-xl mx-auto p-10 mb-28 rounded-lg text-lg space-y-8">
+        <h2 class="text-3xl font-bold mb-6 text-center text-indigo-900">
+            Task our Agent
+        </h2>
+
+        <!-- FORM -->
         <form id="agentForm" class="space-y-6">
+            <!-- Textarea for the task prompt -->
             <div>
-                <label for="description" class="block text-sm font-medium text-indigo-900">Agent Prompt</label>
-                <textarea
-                        id="description"
-                        name="description"
-                        rows="6"
-                        required
-                        class="mt-1 block w-full rounded-md border border-indigo-600 bg-white/10 px-3 py-2 text-indigo-800 placeholder-indigo-400 focus:border-indigo-400 focus:ring-indigo-400"
-                        placeholder="e.g. Analyze how rising average temperatures have altered spring precipitation patterns in the U.S. Midwest from 1970 to 2020, include graphical trend summaries and discuss potential impacts on corn yields."
-                ></textarea>
+                <label for="description"
+                       class="block text-sm font-medium text-indigo-900">
+                    Agent Prompt
+                </label>
+                <textarea id="description"
+                          name="description"
+                          rows="6"
+                          required
+                          class="mt-1 block w-full rounded-md border border-indigo-600 bg-white/10 px-3 py-2 text-indigo-800 placeholder-indigo-400 focus:border-indigo-400 focus:ring-indigo-400"
+                          placeholder="e.g. Analyze how rising average temperatures have altered spring precipitation patterns in the U.S. Midwest from 1970 to 2020, include graphical trend summaries and discuss potential impacts on corn yields."></textarea>
+
             </div>
+
+            <!-- Submit button -->
             <div>
                 <button type="submit"
-                        class="w-full rounded-md bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 px-4 py-2 text-lg font-bold text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                        class="w-full rounded-md bg-gradient-to-r from-blue-500 via-indigo-500
+                       to-purple-600 px-4 py-2 text-lg font-bold text-white shadow-lg
+                       hover:shadow-xl transition-all duration-300">
                     Create Agent
                 </button>
             </div>
         </form>
 
-        <!-- Loading bar, initially hidden -->
+        <!-- Progress bar (hidden until the form is submitted) -->
         <div id="loadingBarContainer" class="hidden mt-6">
             <div class="w-full bg-indigo-100 rounded-full h-4 shadow-inner">
                 <div id="loadingBar"
-                     class="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 h-4 rounded-full transition-all duration-500 ease-in-out"
+                     class="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600
+                    h-4 rounded-full transition-all duration-500 ease-in-out"
                      style="width: 0%"></div>
             </div>
-            <p class="text-center mt-2 text-indigo-700 font-semibold">Processing request...</p>
+            <p class="text-center mt-2 text-indigo-700 font-semibold">
+                Processing request...
+            </p>
         </div>
     </div>
 </main>
 
-<footer class="bg-white mt-10">
+<!-- ───────────────────────── DUMMY FOOTER FOR SPACING (above tree) ───────────────────────── -->
+<footer class="bg-white mt-auto"><!-- mt-auto keeps it at page end -->
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
         <nav class="flex justify-center gap-x-12" aria-label="Footer">
-            <a href="index.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Home</a>
-            <a href="agent.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Agent</a>
-            <a href="discover.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Discover</a>
         </nav>
-        <p class="mt-5 text-center text-lg font-bold text-black-500">&copy; 2025 HiveAI. All rights reserved.</p>
+        <p class="mt-5 text-center text-lg font-bold text-black-500">
+        </p>
     </div>
 </footer>
 
+<!-- Placeholder for the D3 agent tree -->
+<section id="agentTree" class="flex justify-center mt-24 mb-24"></section>
+
+<!-- D3 script (we pull it again to ensure availability even if CDN cached weird) -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+<!-- ─────────────────────── JS: NAV + PROGRESS BAR ─────────────────────────── -->
 <script>
-    // mobile menu toggle
+    /* Mobile menu toggle (adds/removes the hidden class) */
     document.getElementById('mobile-menu-toggle')
-        .addEventListener('click', () => document.getElementById('mobile-menu').classList.toggle('hidden'));
+        .addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
 
-    // handle form submission & loading bar
-    const agentForm = document.getElementById('agentForm');
-    const loadingBarContainer = document.getElementById('loadingBarContainer');
-    const loadingBar = document.getElementById('loadingBar');
+    /* Form submission handler – fakes “running a job” then marks done */
+    const agentForm            = document.getElementById('agentForm');
+    const loadingBarContainer  = document.getElementById('loadingBarContainer');
+    const loadingBar           = document.getElementById('loadingBar');
 
-    agentForm.addEventListener('submit', function(e) {
-        e.preventDefault();
+    agentForm.addEventListener('submit', (e) => {
+        e.preventDefault(); // stop full-page reload
         loadingBarContainer.classList.remove('hidden');
-        loadingBar.style.width = '70%';
+        loadingBar.style.width = '70%';          // snap to 70% quickly
 
-        setTimeout(() => {
+        setTimeout(() => {                       // finish bar after delay
             loadingBar.style.width = '100%';
             setTimeout(() => {
                 loadingBarContainer.innerHTML = `
-            <p class="text-center text-green-600 font-bold text-xl mt-4">
-              Task completed!
-            </p>`;
+          <p class="text-center text-green-600 font-bold text-xl mt-4">
+            Task completed!
+          </p>`;
             }, 500);
         }, 1500);
     });
 </script>
 
+<!-- ─────────── JS: CYCLING PLACEHOLDER TEXT IN THE TEXTAREA ──────────────── -->
 <script>
-    // placeholder cycling for textarea
+    /*
+      We rotate through example prompts so the user sees inspiration.
+      • FADE  – duration (ms) for opacity-fade.
+      • DISPLAY – how long each prompt stays visible (ms). */
     const promptExamples = [
         "e.g. Analyze how rising average temperatures have altered spring precipitation patterns in the U.S. Midwest from 1970 to 2020, include graphical trend summaries and discuss potential impacts on corn yields.",
         "e.g. Evaluate peak-hour traffic sensor data for downtown Los Angeles, propose optimized signal timing adjustments to reduce average commute delays by at least 15%, and outline implementation steps.",
@@ -157,22 +248,283 @@
 
     const FADE    = 1500;
     const DISPLAY = 3500;
-    let idx = 0;
-    const desc = document.getElementById("description");
+    let   idx     = 0;
+    const desc    = document.getElementById("description");
 
+    /* Swap the placeholder with a fade-out → text change → fade-in */
     function cyclePlaceholder() {
-        desc.classList.add("fade");
+        desc.classList.add("fade");     // start fade-out
         setTimeout(() => {
             idx = (idx + 1) % promptExamples.length;
             desc.placeholder = promptExamples[idx];
-            desc.classList.remove("fade");
+            desc.classList.remove("fade"); // fade-in
         }, FADE);
     }
 
+    // Kick off the first cycle after DISPLAY ms, then repeat forever
     setTimeout(() => {
         cyclePlaceholder();
         setInterval(cyclePlaceholder, DISPLAY + FADE * 2);
     }, DISPLAY);
 </script>
+
+<!-- ────────────── JS: DRAWING THE AGENT TREE WITH D3.JS ──────────────────── -->
+<script>
+    /*
+      drawAgentTree(data, mountId)
+      ────────────────────────────
+      • data     – hierarchical JSON describing agents (name, description, children).
+      • mountId  – id of the DOM element where the SVG should go.
+      Creates a collapsible-looking but static tree with:
+        – indigo links
+        – rounded white rectangles for nodes
+        – hover tooltip showing agent.description
+    */
+    function drawAgentTree(data, mountId = 'agentTree') {
+        const mount = document.getElementById(mountId);
+        if (!mount) return;                       // do nothing if mount missing
+
+        /* 1. Prepare D3 hierarchy + layout */
+        const dx = 50, dy = 180;                  // vertical & horizontal spacing
+        const root = d3.hierarchy(data);
+        d3.tree().nodeSize([dx, dy])(root);       // mutate root → adds x/y coords
+
+        const links  = root.links();
+        const nodes  = root.descendants();
+        const height = Math.max(500, nodes.at(-1).x + dx); // ensure min height
+        const width  = root.height * dy + 400;    // width based on tree depth
+
+        /* 2. Clear previous render & create SVG */
+        mount.innerHTML = '';
+        const svg = d3.select(mount)
+            .append('svg')
+            .attr('width',  width)   // actual pixel size
+            .attr('height', height)  // actual pixel size
+            .style('font', '14px/1.35 Inter, sans-serif')
+            .style('overflow', 'visible');
+
+        /* 3. Draw link paths */
+        const linkGen = d3.linkHorizontal()
+            .x(d => d.y)
+            .y(d => d.x);
+
+        svg.append('g')
+            .attr('fill', 'none')
+            .attr('stroke', '#6366f1')              // Tailwind indigo-500
+            .attr('stroke-width', 2)
+            .selectAll('path')
+            .data(links)
+            .join('path')
+            .attr('d', linkGen);
+
+        /* 4. Draw nodes (rect + text) */
+        const node = svg.append('g')
+            .selectAll('g')
+            .data(nodes)
+            .join('g')
+            .attr('transform', d => `translate(${d.y},${d.x})`);
+
+        const BOX_W = 140, BOX_H = 35;            // rectangle dimensions
+
+        node.append('rect')
+            .attr('x', -BOX_W/2)
+            .attr('y', -BOX_H/2)
+            .attr('width',  BOX_W)
+            .attr('height', BOX_H)
+            .attr('rx', 10)
+            .attr('fill', '#ffffff')
+            .attr('stroke', '#6366f1')
+            .attr('stroke-width', 2)
+            .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,.06))');
+
+        node.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('dy', '0.35em')
+            .style('font-weight', 600)
+            .style('pointer-events', 'none')
+            .text(d => d.data.name);
+
+        /* 5. Tooltip on hover (simple div that follows the cursor) */
+        const tip = d3.select('body')
+            .append('div')
+            .style('position', 'absolute')
+            .style('background', '#1e40af')         // indigo-800
+            .style('color', '#fff')
+            .style('padding', '1rem 1.25rem')
+            .style('border-radius', '0.75rem')
+            .style('width', '320px')
+            .style('box-shadow', '0 4px 12px rgba(0,0,0,.15)')
+            .style('font-size', '14px')
+            .style('line-height', '1.35rem')
+            .style('opacity', 0)
+            .style('pointer-events', 'none');
+
+        node.on('mouseover', (e, d) => {
+            tip.html(d.data.description || '')
+                .style('left', `${e.pageX + 12}px`)
+                .style('top',  `${e.pageY + 12}px`)
+                .transition().duration(150).style('opacity', 1);
+        })
+            .on('mousemove', (e) => {
+                tip.style('left', `${e.pageX + 12}px`)
+                    .style('top',  `${e.pageY + 12}px`);
+            })
+            .on('mouseout', () => {
+                tip.transition().duration(150).style('opacity', 0);
+            });
+    }
+
+    /* Demo tree so you see something on load (delete or replace later) */
+    const demoTree = {
+        "name": "ResearchMaster",
+        "description": "Root agent orchestrating all sub-tasks.",
+        "children": [
+            {
+                "name": "Crawler",
+                "description": "Collects relevant papers from multiple scholarly databases.",
+                "children": [
+                    {
+                        "name": "LinkParser",
+                        "description": "Parses and deduplicates citation links for the crawler."
+                    }
+                ]
+            },
+            {
+                "name": "Analyzer",
+                "description": "Runs statistical models and ML pipelines on harvested data."
+            },
+            {
+                "name": "Summarizer",
+                "description": "Produces concise, executive-level briefs from analysis results."
+            }
+        ]
+    };
+
+    // Small tree (3 nodes)
+    const demoTreeSmall = {
+        name: "Root",
+        description: "Top-level node",
+        children: [
+            { name: "Leaf A", description: "First child of root" },
+            { name: "Leaf B", description: "Second child of root" }
+        ]
+    };
+
+    // Medium tree (8 nodes)
+    const demoTreeMedium = {
+        name: "Root",
+        description: "Top-level orchestrator",
+        children: [
+            {
+                name: "Branch 1",
+                description: "First branch",
+                children: [
+                    { name: "Leaf 1A", description: "Child of Branch 1" },
+                    { name: "Leaf 1B", description: "Another child of Branch 1" }
+                ]
+            },
+            {
+                name: "Branch 2",
+                description: "Second branch",
+                children: [
+                    {
+                        name: "Sub-branch 2A",
+                        description: "Nested deeper",
+                        children: [
+                            { name: "Leaf 2A-i", description: "Deep leaf" }
+                        ]
+                    }
+                ]
+            },
+            { name: "Branch 3", description: "Standalone leaf" }
+        ]
+    };
+
+    // Large tree (15 nodes)
+    const demoTreeLarge = {
+        name: "Root",
+        description: "Entry point for a complex workflow",
+        children: [
+            {
+                name: "Collector",
+                description: "Gathers data",
+                children: [
+                    { name: "Fetch API", description: "Retrieves from external APIs Retrieves from external APIs Retrieves from external APIs Retrieves from external APIs Retrieves from external APIs" },
+                    { name: "DB Reader", description: "Reads from database" },
+                    {
+                        name: "Parser",
+                        description: "Parses raw data",
+                        children: [
+                            { name: "JSON Parser", description: "Handles JSON" },
+                            { name: "XML Parser", description: "Handles XML" }
+                        ]
+                    }
+                ]
+            },
+            {
+                name: "Processor",
+                description: "Processes data",
+                children: [
+                    {
+                        name: "Cleaner",
+                        description: "Cleans up invalid entries"
+                    },
+                    {
+                        name: "Transformer",
+                        description: "Transforms format",
+                        children: [
+                            { name: "Normalize", description: "Standardizes values" },
+                            { name: "Aggregate", description: "Groups by key" }
+                        ]
+                    }
+                ]
+            },
+            {
+                name: "Analyzer",
+                description: "Runs analytics",
+                children: [
+                    { name: "Stat Model", description: "Statistical analysis" },
+                    { name: "ML Model", description: "Machine learning predictions" }
+                ]
+            },
+            {
+                name: "Reporter",
+                description: "Generates reports",
+                children: [
+                    { name: "PDF Generator", description: "Creates PDF files" },
+                    { name: "Email Sender", description: "Emails reports" }
+                ]
+            }
+        ]
+    };
+
+
+
+    /* Render the demo when the DOM is ready */
+    document.addEventListener('DOMContentLoaded', () => {
+        //drawAgentTree(demoTreeSmall, 'agentTree');
+        drawAgentTree(demoTreeMedium, 'agentTree');
+        //drawAgentTree(demoTreeLarge, 'agentTree');
+
+    });
+
+    /* Expose drawAgentTree globally so you can call it from elsewhere */
+    window.drawAgentTree = drawAgentTree;
+</script>
+
+<!-- ───────────────────────── FOOTER (moved to very bottom) ───────────────────────── -->
+<footer class="bg-white mt-auto"><!-- mt-auto keeps it at page end -->
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <nav class="flex justify-center gap-x-12" aria-label="Footer">
+            <a href="index.html"   class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Home</a>
+            <a href="agent.html"   class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Agent</a>
+            <a href="discover.html"class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Discover</a>
+        </nav>
+        <p class="mt-5 text-center text-lg font-bold text-black-500">
+            &copy; 2025 HiveAI. All rights reserved.
+        </p>
+    </div>
+</footer>
+
 </body>
 </html>
