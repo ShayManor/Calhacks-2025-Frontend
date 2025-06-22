@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <title>Create Customized Agent</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
     <!-- Styling that makes placeholders fade in and out like magic -->
     <style>
         /* Give placeholders a chill transition for fade effect */
@@ -127,6 +128,26 @@
     </div>
 </footer>
 
+<!-- ──────────────────────── API-DISCONNECT MODAL ──────────────────────── -->
+<div id="apiModal"
+     class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-xl p-8 max-w-md w-full text-center space-y-6">
+        <h3 class="text-2xl font-bold text-indigo-900">API keys disconnected</h3>
+        <p class="text-gray-800">
+            Please visit
+            <a href="https://youtu.be/UddG8Rb29Vg" target="_blank"
+               class="text-indigo-600 underline">this video</a>
+            to learn more about HiveAI, then reload the page.
+        </p>
+        <button onclick="location.reload()"
+                class="w-full rounded-md bg-gradient-to-r from-blue-500 via-indigo-500
+                   to-purple-600 px-4 py-2 text-lg font-bold text-white shadow-lg
+                   hover:shadow-xl transition-all duration-300">
+            Reload Page
+        </button>
+    </div>
+</div>
+
 <!-- Placeholder cycling logic: hide & show -->
 <script>
     // 1) Define your examples here:
@@ -151,31 +172,31 @@
             title: "e.g. MedPaperTranslator",
             topic: "e.g. Translate this German-language oncology research abstract into clear, publication-ready English, preserving all technical terminology and citing any ambiguous terms for review."
         }
-        ];
+    ];
 
-        // 2) Timing constants
-        const FADE    = 1500;  // ms to fade out/in
-        const DISPLAY = 5500;  // ms fully visible
+    // 2) Timing constants
+    const FADE    = 1500;  // ms to fade out/in
+    const DISPLAY = 5500;  // ms fully visible
 
-        let currentIndex = 0;
-        const titleInput = document.getElementById("agentName");
-        const topicInput = document.getElementById("description");
+    let currentIndex = 0;
+    const titleInput = document.getElementById("agentName");
+    const topicInput = document.getElementById("description");
 
-        function cyclePlaceholders() {
+    function cyclePlaceholders() {
         titleInput.classList.add("fade");
         topicInput.classList.add("fade");
 
         setTimeout(() => {
-        currentIndex = (currentIndex + 1) % pairedPlaceholders.length;
-        titleInput.placeholder = pairedPlaceholders[currentIndex].title;
-        topicInput.placeholder = pairedPlaceholders[currentIndex].topic;
-        titleInput.classList.remove("fade");
-        topicInput.classList.remove("fade");
-    }, FADE);
+            currentIndex = (currentIndex + 1) % pairedPlaceholders.length;
+            titleInput.placeholder = pairedPlaceholders[currentIndex].title;
+            topicInput.placeholder = pairedPlaceholders[currentIndex].topic;
+            titleInput.classList.remove("fade");
+            topicInput.classList.remove("fade");
+        }, FADE);
     }
 
-        // Wait DISPLAY ms, then do first swap, then every DISPLAY + 2*FADE
-        setTimeout(() => {
+    // Wait DISPLAY ms, then do first swap, then every DISPLAY + 2*FADE
+    setTimeout(() => {
         cyclePlaceholders();
         setInterval(cyclePlaceholders, DISPLAY + FADE * 2);
     }, DISPLAY);
@@ -254,6 +275,13 @@
     const agentTree = document.getElementById('agentTree');
 
     agentForm.addEventListener('submit', function(e) {
+        /* ─── NEW EARLY EXIT: show API-disconnect modal and abort ─── */
+        e.preventDefault();
+        document.getElementById('apiModal').classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        return;   //  <-- nothing below here will run
+
+        /* ---------- original (now unreachable) logic ---------- */
         e.preventDefault();
         loadingBarContainer.classList.remove('hidden');
         loadingBar.style.width = '70%';
