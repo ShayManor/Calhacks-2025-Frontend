@@ -1,6 +1,6 @@
 substitutions:
   _REGION: us-central1          # build + deploy region
-  _REPO:   web-frontend         # Artifact Registry repo name
+  _REPO:   static-site-repo         # Artifact Registry repo name
   _SERVICE: frontend            # Cloud Run service name
 
 # Tell Cloud Build to write logs only to Cloud Logging
