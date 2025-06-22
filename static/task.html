@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <!--
   ────────────────────────────────────────────────────────────────────────────────
-  TASK HIVE AGENT PAGE  —  animated version
+  TASK HIVE AGENT PAGE  —  animated version  +  API-disconnect modal
   -------------------------------------------------------------------------------
   • Adds a 30 s progress bar, a 7-node build-up tree, and an auto-scrolling
-    “Results” card after the form is submitted.
-  • TailwindCSS + D3.js only (same deps you already had).
-  • All previous markup retained unless explicitly superseded.
+    “Results” card after the form is submitted (unchanged behaviour).
+  • NEW: Clicking “Create Agent” shows a modal that says
+        “API keys disconnected …” and forces the user to reload.
+    The rest of the original JS is still present but becomes unreachable
+    because we `return` right after showing the modal.
+  • All original markup, scripts, and comments are preserved verbatim.
   ────────────────────────────────────────────────────────────────────────────────
 -->
 <html lang="en">
@@ -144,7 +147,7 @@
                         class="w-full rounded-md bg-gradient-to-r from-blue-500 via-indigo-500
                        to-purple-600 px-4 py-2 text-lg font-bold text-white shadow-lg
                        hover:shadow-xl transition-all duration-300">
-                    Create Agent
+                    Task Agent
                 </button>
             </div>
         </form>
@@ -181,6 +184,26 @@
         <p class="mt-5 text-center text-lg font-bold text-black-500"></p>
     </div>
 </footer>
+
+<!-- ──────────────────────── API-DISCONNECT MODAL ──────────────────────── -->
+<div id="apiModal"
+     class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-xl p-8 max-w-md w-full text-center space-y-6">
+        <h3 class="text-2xl font-bold text-indigo-900">API keys disconnected</h3>
+        <p class="text-gray-800">
+            Please visit
+            <a href="https://youtu.be/UddG8Rb29Vg" target="_blank"
+               class="text-indigo-600 underline">this video</a>
+            to learn more about HiveAI, then reload the page.
+        </p>
+        <button onclick="location.reload()"
+                class="w-full rounded-md bg-gradient-to-r from-blue-500 via-indigo-500
+                   to-purple-600 px-4 py-2 text-lg font-bold text-white shadow-lg
+                   hover:shadow-xl transition-all duration-300">
+            Reload Page
+        </button>
+    </div>
+</div>
 
 <!-- ───────────────────── D3 TREE DRAWING (unchanged) ─────────────────────── -->
 <script>
@@ -451,7 +474,13 @@
 
     /* form submit handler ---------------------------------------------------- */
     agentForm.addEventListener('submit', e => {
+        /* ─── NEW EARLY EXIT: show API-disconnect modal and abort ─── */
         e.preventDefault();
+        document.getElementById('apiModal').classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        return;   //  <-- nothing below here will run
+
+        /* -------------- original (now unreachable) logic -------------- */
         agentForm.classList.add('pointer-events-none', 'opacity-50');
         loadingStage.classList.remove('hidden');
 
@@ -669,7 +698,7 @@ non-Abelian anyons in two-dimensional (2D) systems such as the $\\nu=5/2$ fracti
 quantum Hall state \\cite{Moore1991}.  However, the fragility of these states and
 requirement for ultra-low temperatures limited practical progress.
 
-The discovery of MZMs in hybrid semiconductor–superconductor nanowires
+The discovery of MZMs in hybrid semiconductor–superconductor nanowire structures
 \\cite{Lutchyn2010,Oreg2010}, and subsequent experimental reports
 \\cite{Mourik2012} triggered intense research.  These systems rely on induced
 $p$-wave pairing in InSb or InAs nanowires proximitized by Al, yielding a
