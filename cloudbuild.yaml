@@ -13,6 +13,7 @@ steps:
     args:
       - build
       - --tag
+      - --no-cache,
       - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA
       - .
 
