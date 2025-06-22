@@ -2,99 +2,114 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Create Research Agent</title>
+    <title>Create Customized Agent</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Styling that makes placeholders fade in and out like magic -->
+    <style>
+        /* Give placeholders a chill transition for fade effect */
+        input::placeholder,
+        textarea::placeholder {
+            opacity: 1;                /* start fully visible */
+            transition: opacity 1.5s ease; /* smooth fade timing */
+        }
+        /* When we tag inputs with .fade, hide the placeholder */
+        input.fade::placeholder,
+        textarea.fade::placeholder {
+            opacity: 0; /* placeholder goes ghost mode */
+        }
+    </style>
 </head>
 <body>
-<!-- control for the Navbar properties + look -->
+<!-- Navbar section: simple branding and links -->
 <nav class="bg-white shadow-lg">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-20">
             <div class="flex items-center">
+                <!-- Logo + title combo -->
                 <a href="index.html" class="flex items-center">
-                    <svg class="w-12 h-12 text-indigo-700 drop-shadow" viewBox="-2 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Left Hexagon -->
-                        <path d="M0 75 L15 50 L45 50 L60 75 L45 100 L15 100 Z"
-                              stroke="currentColor" stroke-width="6"
-                              fill="none" stroke-linejoin="round" stroke-linecap="round" />
-                        <!-- Right Hexagon -->
-                        <path d="M45 75 L60 50 L90 50 L105 75 L90 100 L60 100 Z"
-                              stroke="currentColor" stroke-width="6"
-                              fill="none" stroke-linejoin="round" stroke-linecap="round" />
-                        <!-- Top Hexagon -->
-                        <path d="M22.5 40 L37.5 15 L67.5 15 L82.5 40 L67.5 65 L37.5 65 Z"
-                              stroke="currentColor" stroke-width="6"
-                              fill="none" stroke-linejoin="round" stroke-linecap="round" />
+                    <svg class="w-12 h-12 text-indigo-700 drop-shadow" viewBox="-2 0 110 110" fill="none">
+                        <!-- three hexagons for the Hive look -->
+                        <path d="M0 75 L15 50 L45 50 L60 75 L45 100 L15 100 Z" stroke="currentColor" stroke-width="6" fill="none"/>
+                        <path d="M45 75 L60 50 L90 50 L105 75 L90 100 L60 100 Z" stroke="currentColor" stroke-width="6" fill="none"/>
+                        <path d="M22.5 40 L37.5 15 L67.5 15 L82.5 40 L67.5 65 L37.5 65 Z" stroke="currentColor" stroke-width="6" fill="none"/>
                     </svg>
-                    <span class="ml-3 text-3xl font-semibold relative after:content-[''] after:block after:w-full after:h-[3px] after:bg-transparent after:absolute after:bottom-[12px]">HiveAI</span>
+                    <span class="ml-3 text-3xl font-semibold">HiveAI</span>
                 </a>
+                <!-- Desktop nav links, hidden on mobile -->
                 <div class="hidden sm:flex sm:ml-10 mt-1.5 space-x-8">
-                    <a href="agent.html" class="border-b-2 border-indigo-500 text-lg font-semibold text-gray-900 px-1 py-2 hover:text-indigo-700 transition">Agent</a>
-                    <a href="discover.html" class="border-b-2 border-transparent text-lg font-semibold text-gray-900 px-1 py-2 hover:text-indigo-700 transition">Discover</a>
+                    <a href="task.html" class="border-b-2 border-transparent text-lg font-semibold text-gray-900 hover:text-indigo-700 transition">Task</a>
+                    <a href="agent.html" class="border-b-2 border-indigo-500 text-lg font-semibold text-gray-900 hover:text-indigo-700 transition">Agent</a>
+                    <a href="discover.html" class="border-b-2 border-transparent text-lg font-semibold text-gray-900 hover:text-indigo-700 transition">Discover</a>
                 </div>
             </div>
+            <!-- Mobile menu toggle button -->
             <div class="flex items-center">
-                <button type="button" class="bg-gray-100 p-2 rounded-full text-gray-900 hover:text-indigo-700 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:hidden" id="mobile-menu-toggle">
+                <button id="mobile-menu-toggle" class="bg-gray-100 p-2 rounded-full text-gray-900 hover:text-indigo-700 hover:bg-indigo-50 focus:ring-2 focus:ring-indigo-500 sm:hidden">
                     <span class="sr-only">Open main menu</span>
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                     </svg>
                 </button>
             </div>
         </div>
     </div>
-    <div class="sm:hidden hidden" id="mobile-menu">
+    <!-- Mobile menu content, slides down when toggled -->
+    <div id="mobile-menu" class="sm:hidden hidden">
         <div class="px-2 pt-2 pb-3 space-y-1">
             <a href="agent.html" class="block border-l-4 border-indigo-500 bg-indigo-50 text-gray-900 px-3 py-2 text-base font-medium">Agent</a>
-            <a href="discover.html" class="block border-l-4 border-transparent text-gray-900 hover:bg-indigo-50 hover:border-indigo-600 hover:text-indigo-700 px-3 py-2 text-base font-medium">Discover</a>
+            <a href="discover.html" class="block border-l-4 border-transparent text-gray-900 hover:bg-indigo-50 hover:border-indigo-600 px-3 py-2 text-base font-medium">Discover</a>
         </div>
     </div>
 </nav>
 
 <main class="container mx-auto pt-25">
-    <div class="px-6 py-16 lg:px-8">
-        <div class="mx-auto max-w-3xl text-center">
-            <h2 class="mt-2 text-4xl font-bold tracking-tight text-indigo-950 sm:text-6xl">
-                Boost Productivity with Hive
-            </h2>
-            <p class="mt-6 text-lg text-indigo-900">
-                Enter a title for your agent and a quick prompt describing what you need from it. Our AI agent will search through the hive, using other existing agents and creating new ones in real time when necessary.
-            </p>
-        </div>
+    <!-- Hero intro: punchy headline + subtext -->
+    <div class="px-6 py-16 lg:px-8 text-center max-w-3xl mx-auto">
+        <h2 class="mt-2 text-4xl font-bold text-indigo-950 sm:text-6xl">Create Customized Agents With Hive</h2>
+        <p class="mt-6 text-lg text-indigo-900">
+            Enter a title for your agent and a quick prompt describing what you need from it. Our AI agent will search through the hive, using other existing agents and creating new ones in real time when necessary.
+        </p>
     </div>
 
-    <div id="initialForm" class="backdrop-blur-md bg-white/10 border border-white/20 shadow-lg max-w-xl mx-auto p-10 mb-28 rounded-lg text-lg space-y-8">
-        <h2 class="text-3xl font-bold mb-6 text-center text-indigo-900">Create an Agent</h2>
+    <!-- Form container with frosted-glass vibe -->
+    <div id="initialForm" class="bg-white/10 backdrop-blur-md border border-white/20 shadow-lg max-w-xl mx-auto p-10 mb-28 rounded-lg text-lg space-y-8">
+        <h2 class="text-3xl font-bold text-center text-indigo-900 mb-6">Create an Agent</h2>
         <form id="agentForm" class="space-y-6">
+            <!-- Agent name field -->
             <div>
                 <label for="agentName" class="block text-sm font-medium text-indigo-900">Your Agent Name</label>
-                <input type="text" id="agentName" name="agentName" required
+                <input id="agentName" name="agentName" required
                        class="mt-1 block w-full rounded-md border border-indigo-600 bg-white/10 px-3 py-2 text-indigo-800 placeholder-indigo-400 focus:border-indigo-400 focus:ring-indigo-400"
-                       placeholder="e.g. Ocean Microplastics Impact">
+                       placeholder="e.g. ProteinFoldingSimulator">
             </div>
+            <!-- Agent prompt field -->
             <div>
                 <label for="description" class="block text-sm font-medium text-indigo-900">Agent Prompt</label>
-                <textarea id="description" name="description" required
-                          class="mt-1 block w-full rounded-md border border-indigo-600 bg-white/10 px-3 py-2 text-indigo-800 placeholder-indigo-400 focus:border-indigo-400 focus:ring-indigo-400"
-                          placeholder="e.g. How do microplastics affect aquatic ecosystems at the cellular level?"></textarea>
+                <textarea
+                        id="description"
+                        name="description"
+                        rows="6"
+                        class="mt-1 block w-full h-40 rounded-md border border-indigo-600 bg-white/10 px-3 py-2 text-indigo-800 placeholder-indigo-400 focus:border-indigo-400 focus:ring-indigo-400"
+                        placeholder="e.g. Predict the 3D structure of a protein from its amino acid sequence using a deep learning model, output a PDB file and per-residue confidence scores."
+                        required
+                ></textarea>
             </div>
-            <div>
-                <button type="submit"
-                        class="w-full rounded-md bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 px-4 py-2 text-lg font-bold text-white shadow-lg hover:shadow-xl transition-all duration-300">
-                    Create Agent
-                </button>
-            </div>
+            <!-- Submit button that'll do the magic -->
+            <button type="submit" class="w-full rounded-md bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 px-4 py-2 font-bold text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                Create Agent
+            </button>
         </form>
 
-        <!-- Loading bar, initially hidden -->
+        <!-- Hidden loading bar, shows up on submit -->
         <div id="loadingBarContainer" class="hidden mt-6">
             <div class="w-full bg-indigo-100 rounded-full h-4 shadow-inner">
                 <div id="loadingBar" class="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 h-4 rounded-full transition-all duration-500 ease-in-out" style="width: 0%"></div>
             </div>
-            <p class="text-center mt-2 text-indigo-700 font-semibold">Creating your research agent...</p>
+            <p class="mt-2 text-center text-indigo-700 font-semibold">Creating your research agent...</p>
         </div>
     </div>
 
+    <!-- Where the agent tree pops in once created im going crazy-->
     <div id="agentTreeContainer" class="max-w-full mx-auto mb-12">
         <h3 class="text-2xl font-bold text-indigo-900 mb-4 text-center">Agent Call Tree</h3>
         <div id="agentTree" class="flex flex-col items-center space-y-20"></div>
@@ -103,18 +118,71 @@
 
 <footer class="bg-white mt-10">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
-        <nav class="flex justify-center gap-x-12" aria-label="Footer">
+        <nav class="flex justify-center gap-x-12">
             <a href="index.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Home</a>
+            <a href="task.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Task</a>
             <a href="discover.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Discover</a>
         </nav>
-        <p class="mt-5 text-center text-lg font-bold text-black-500 ">
-            &copy; 2025 HiveAI. All rights reserved.
-        </p>
+        <p class="mt-5 text-center text-lg font-bold text-gray-500">&copy; 2025 HiveAI. All rights reserved.</p>
     </div>
 </footer>
 
+<!-- Placeholder cycling logic: hide & show -->
 <script>
-    // agent-list & tree-builder from your original code
+    // 1) Define your examples here:
+    const pairedPlaceholders = [
+        {
+            title: "e.g. ClimateModeler",
+            topic: "e.g. Analyze how rising average temperatures have altered spring precipitation patterns in the U.S. Midwest from 1970 to 2020, include graphical trend summaries and discuss potential impacts on corn yields."
+        },
+        {
+            title: "e.g. TrafficFlowOptimizer",
+            topic: "e.g. Evaluate peak-hour traffic sensor data for downtown Los Angeles, propose optimized signal timing adjustments to reduce average commute delays by at least 15%, and outline implementation steps."
+        },
+        {
+            title: "e.g. CropYieldPredictor",
+            topic: "e.g. Using historical weather, soil moisture, and planting density data for Kansas wheat farms, build a model to forecast next season’s yield with an estimated error margin, and explain feature importance."
+        },
+        {
+            title: "e.g. CyberThreatDetector",
+            topic: "e.g. Scan network packet logs for anomalous patterns indicative of DDoS or intrusion attempts, classify each event type, and generate a summary report with timestamps and recommended mitigation actions."
+        },
+        {
+            title: "e.g. MedPaperTranslator",
+            topic: "e.g. Translate this German-language oncology research abstract into clear, publication-ready English, preserving all technical terminology and citing any ambiguous terms for review."
+        }
+        ];
+
+        // 2) Timing constants
+        const FADE    = 1500;  // ms to fade out/in
+        const DISPLAY = 5500;  // ms fully visible
+
+        let currentIndex = 0;
+        const titleInput = document.getElementById("agentName");
+        const topicInput = document.getElementById("description");
+
+        function cyclePlaceholders() {
+        titleInput.classList.add("fade");
+        topicInput.classList.add("fade");
+
+        setTimeout(() => {
+        currentIndex = (currentIndex + 1) % pairedPlaceholders.length;
+        titleInput.placeholder = pairedPlaceholders[currentIndex].title;
+        topicInput.placeholder = pairedPlaceholders[currentIndex].topic;
+        titleInput.classList.remove("fade");
+        topicInput.classList.remove("fade");
+    }, FADE);
+    }
+
+        // Wait DISPLAY ms, then do first swap, then every DISPLAY + 2*FADE
+        setTimeout(() => {
+        cyclePlaceholders();
+        setInterval(cyclePlaceholders, DISPLAY + FADE * 2);
+    }, DISPLAY);
+</script>
+
+<script>
+    // agent-list & tree-builder, totally straightforward
     const agentList = [
         { id:1,parentId:null,name:'HiveAgent',description:'Orchestrates child agents.'},
         { id:2,parentId:1,name:'FlightSearcher',description:'Finds best flight options.'},
@@ -130,40 +198,43 @@
 
     function buildAgentTree(list) {
         const map = {}, roots = [];
+        // create map for quick parent lookup
         list.forEach(i => map[i.id] = { ...i, children: [] });
         list.forEach(i => {
             if (i.parentId && map[i.parentId]) map[i.parentId].children.push(map[i.id]);
-            else roots.push(map[i.id]);
+            else roots.push(map[i.id]); // top-level agents
         });
         return roots;
     }
 
     function renderNodeHorizontal(node) {
-        // no mx-4 here—so container is only as wide as needed
+        // container holds everything for this node
         const container = document.createElement('div');
         container.className = 'relative flex flex-col items-center';
 
+        // pulse circle as a node marker
         const circle = document.createElement('div');
         circle.className = 'w-12 h-12 bg-yellow-500 rounded-full shadow-lg shadow-yellow-500/50 animate-pulse';
         container.appendChild(circle);
 
+        // agent name below circle
         const nameEl = document.createElement('div');
         nameEl.textContent = node.name;
         nameEl.className = 'mt-2 text-sm font-medium text-gray-900';
         container.appendChild(nameEl);
 
+        // hidden tooltip with description
         const tip = document.createElement('div');
         tip.style.display = 'none';
         tip.className = 'absolute bottom-full left-1/2 -translate-x-1/2 bg-white/20 backdrop-blur-md border border-white/30 rounded-lg shadow-md p-2 text-sm text-gray-900 w-[350px] text-center';
         tip.innerHTML = node.description;
         container.appendChild(tip);
-
         circle.addEventListener('mouseenter', () => tip.style.display = 'block');
         circle.addEventListener('mouseleave', () => tip.style.display = 'none');
 
+        // render children if present
         if (node.children && node.children.length) {
             const row = document.createElement('div');
-            // horizontal row of children, centered under the parent
             row.className = 'flex justify-center items-start space-x-12 mt-16';
             node.children.forEach(child => row.appendChild(renderNodeHorizontal(child)));
             container.appendChild(row);
@@ -172,12 +243,11 @@
         return container;
     }
 
-
-    // mobile menu toggle
+    // mobile menu toggle logic
     document.getElementById('mobile-menu-toggle')
         .addEventListener('click', () => document.getElementById('mobile-menu').classList.toggle('hidden'));
 
-    // integrate the new submit handler
+    // form submit: show loading then tree
     const agentForm = document.getElementById('agentForm');
     const loadingBarContainer = document.getElementById('loadingBarContainer');
     const loadingBar = document.getElementById('loadingBar');
@@ -190,19 +260,13 @@
 
         setTimeout(() => {
             loadingBar.style.width = '100%';
-
             setTimeout(() => {
-                loadingBarContainer.innerHTML =
-                    `<p class="text-center text-green-600 font-bold text-xl mt-4">
-                        Agent Created Successfully!
-                    </p>`;
-
-                // now render agent tree
+                loadingBarContainer.innerHTML = `<p class="text-center text-green-600 font-bold text-xl mt-4">Agent Created Successfully!</p>`;
                 const roots = buildAgentTree(agentList);
                 agentTree.innerHTML = '';
                 roots.forEach(r => agentTree.appendChild(renderNodeHorizontal(r)));
-            }, 500);
-        }, 1500);
+            }, 1500);
+        }, 3500);
     });
 </script>
 </body>

@@ -77,8 +77,9 @@
 
                         <!-- Nav links (slightly lowered) -->
                         <div class="hidden sm:flex sm:ml-10 mt-1.5 space-x-8">
-                            <a href="agent.html" class="border-b-2 border-transparent text-lg font-semibold text-gray-900 px-1 py-1 hover:text-indigo-600 transition">Agent</a>
-                            <a href="discover.html" class="border-b-2 border-transparent text-lg font-semibold text-gray-900 px-1 py-1 hover:text-indigo-600 transition">Discover</a>
+                            <a href="task.html" class="border-b-2 border-transparent text-lg font-semibold text-gray-900 px-1 py-2 hover:text-indigo-700 transition">Task</a>
+                            <a href="agent.html" class="border-b-2 border-transparent text-lg font-semibold text-gray-900 px-1 py-2 hover:text-indigo-700 transition">Agent</a>
+                            <a href="discover.html" class="border-b-2 border-transparent text-lg font-semibold text-gray-900 px-1 py-2 hover:text-indigo-700 transition">Discover</a>
                         </div>
                     </div>
 
@@ -261,8 +262,9 @@
     <div class="relative z-50 w-full">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <nav class="flex justify-center gap-x-12" aria-label="Footer">
-                <a href="agent.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition">Agent</a>
-                <a href="discover.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition">Discover</a>
+                <a href="task.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Task</a>
+                <a href="agent.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Agent</a>
+                <a href="discover.html" class="text-lg font-semibold text-gray-900 hover:text-indigo-700">Discover</a>
             </nav>
             <p class="mt-4 text-center text-lg font-bold text-black-500">
                 &copy; 2025 HiveAI. All rights reserved.
@@ -291,42 +293,42 @@
 <!-- ----------------------------------------------------------------------------------------------- -->
 <script>
     const vertex = `
-    attribute vec2 position;
-    void main() {
-      gl_Position = vec4(position, 1.0, 1.0);
-    }
-  `;
+        attribute vec2 position;
+        void main() {
+          gl_Position = vec4(position, 1.0, 1.0);
+        }
+      `;
 
     const fragment = `
-precision mediump float;
-uniform float u_time;
-uniform vec2 u_resolution;
+        precision mediump float;
+        uniform float u_time;
+        uniform vec2 u_resolution;
 
-void main() {
-  vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+        void main() {
+          vec2 uv = gl_FragCoord.xy / u_resolution.xy;
 
-  vec2 centers[3];
-  centers[0] = vec2(0.3, 0.3);
-  centers[1] = vec2(0.7, 0.4);
-  centers[2] = vec2(0.5, 0.8);
+          vec2 centers[3];
+          centers[0] = vec2(0.3, 0.3);
+          centers[1] = vec2(0.7, 0.4);
+          centers[2] = vec2(0.5, 0.8);
 
-  float rippleSum = 0.0;
+          float rippleSum = 0.0;
 
-  for (int i = 0; i < 3; i++) {
-    vec2 st = uv - centers[i];
-    float dist = length(st);
-rippleSum += sin(14.0 * dist - u_time * 0.7) / 3.0;
-  }
+          for (int i = 0; i < 3; i++) {
+            vec2 st = uv - centers[i];
+            float dist = length(st);
+        rippleSum += sin(15.0 * dist - u_time * 0.7) / 3.0;
+          }
 
-  float intensity = 0.4 + 0.6 * rippleSum;
+          float intensity = 0.4 + 0.6 * rippleSum;
 
-  vec3 base = vec3(0.02, 0.05, 0.2);   // dark blue background
-  vec3 wave = vec3(0.1, 0.5, 0.9);     // ripple blue glow
-  vec3 color = mix(base, wave, intensity);
+          vec3 base = vec3(0.02, 0.05, 0.2);   // dark blue background
+          vec3 wave = vec3(0.1, 0.5, 0.9);     // ripple blue glow
+          vec3 color = mix(base, wave, intensity);
 
-  gl_FragColor = vec4(color, 0.5);     // semi-transparent
-}
-`;
+          gl_FragColor = vec4(color, 0.5);     // semi-transparent
+        }
+        `;
 
 
 
