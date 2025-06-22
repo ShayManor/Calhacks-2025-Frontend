@@ -282,57 +282,66 @@
     */
     function drawAgentTree(data, mountId = 'agentTree') {
         const mount = document.getElementById(mountId);
-        if (!mount) return;                       // do nothing if mount missing
+        if (!mount) return;
 
-        /* 1. Prepare D3 hierarchy + layout */
-        const dx = 50, dy = 180;                  // vertical & horizontal spacing
+        /* ── layout ─────────────────────────────────────────────── */
+        const dx = 60, dy = 250;
         const root = d3.hierarchy(data);
-        d3.tree().nodeSize([dx, dy])(root);       // mutate root → adds x/y coords
+        d3.tree().nodeSize([dx, dy])(root);           // adds x / y
 
-        const links  = root.links();
-        const nodes  = root.descendants();
-        const height = Math.max(500, nodes.at(-1).x + dx); // ensure min height
-        const width  = root.height * dy + 400;    // width based on tree depth
+        const nodes = root.descendants();
+        const links = root.links();
 
-        /* 2. Clear previous render & create SVG */
+        /* ── 1. shift every node so minX == dx  ─────────────────── */
+        const minX = d3.min(nodes, d => d.x);
+        const maxX = d3.max(nodes, d => d.x);
+        const yPad = dx;                              // top / bottom padding
+
+        nodes.forEach(d => (d.x = d.x - minX + yPad)); // all y ≥ padding now
+
+        /* ── 2. final canvas size ───────────────────────────────── */
+        const height = maxX - minX + yPad * 2;        // total vertical span
+        const width  = root.height * dy + 400;        // horizontal span
+
+        /* ── 3. paint ───────────────────────────────────────────── */
         mount.innerHTML = '';
         const svg = d3.select(mount)
             .append('svg')
-            .attr('width',  width)   // actual pixel size
-            .attr('height', height)  // actual pixel size
-            .style('font', '14px/1.35 Inter, sans-serif')
+            .attr('width',  width)
+            .attr('height', height)
+            .style('font', '16px/1.35 Inter, sans-serif')
             .style('overflow', 'visible');
 
-        /* 3. Draw link paths */
+        /* links */
         const linkGen = d3.linkHorizontal()
             .x(d => d.y)
             .y(d => d.x);
 
         svg.append('g')
             .attr('fill', 'none')
-            .attr('stroke', '#6366f1')              // Tailwind indigo-500
+            .attr('stroke', '#6366f1')
             .attr('stroke-width', 2)
             .selectAll('path')
             .data(links)
             .join('path')
             .attr('d', linkGen);
 
-        /* 4. Draw nodes (rect + text) */
+        /* nodes */
+        const BOX_W = 170, BOX_H = 45;
+
         const node = svg.append('g')
             .selectAll('g')
             .data(nodes)
             .join('g')
             .attr('transform', d => `translate(${d.y},${d.x})`);
 
-        const BOX_W = 140, BOX_H = 35;            // rectangle dimensions
-
         node.append('rect')
-            .attr('x', -BOX_W/2)
-            .attr('y', -BOX_H/2)
+            .attr('x', -BOX_W / 2)
+            .attr('y', -BOX_H / 2)
             .attr('width',  BOX_W)
             .attr('height', BOX_H)
             .attr('rx', 10)
-            .attr('fill', '#ffffff')
+            .attr('fill', '#fff')
             .attr('stroke', '#6366f1')
             .attr('stroke-width', 2)
             .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,.06))');
@@ -344,7 +353,7 @@
             .style('pointer-events', 'none')
             .text(d => d.data.name);
 
-        /* 5. Tooltip on hover (simple div that follows the cursor) */
+    /* 5. Tooltip on hover (simple div that follows the cursor) */
         const tip = d3.select('body')
             .append('div')
             .style('position', 'absolute')
@@ -503,8 +512,8 @@
     /* Render the demo when the DOM is ready */
     document.addEventListener('DOMContentLoaded', () => {
         //drawAgentTree(demoTreeSmall, 'agentTree');
-        drawAgentTree(demoTreeMedium, 'agentTree');
-        //drawAgentTree(demoTreeLarge, 'agentTree');
+        //drawAgentTree(demoTreeMedium, 'agentTree');
+        drawAgentTree(demoTreeLarge, 'agentTree');
 
     });
 
